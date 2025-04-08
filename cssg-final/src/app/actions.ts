@@ -40,12 +40,58 @@ export async function signup(formData: FormData) {
     username: formData.get('username') as string,
   }
 
-  const { error } = await supabase.auth.signUp(data)
+   // Check if a user already exists with the provided username
+   const { data: existingUsernames, error: usernameError } = await supabase
+    .from('users')
+    .select('username')
+    .eq('username', non_auth_data.username);
 
-  if (error) {
+  if (usernameError) {
+    console.error('Error checking if username exists:', usernameError)
     redirect('/error')
   }
 
+  // If the username already exists, do nothing
+  if (existingUsernames.length > 0) {
+    console.log('Username already taken:', non_auth_data.username)
+    return;
+  }
+
+  const { data: authData, error: authError } = await supabase.auth.signUp(data)
+
+  if (authError) {
+    console.error('Error signing up auth user:', authError)
+    redirect('/error')
+  }
+
+  const user = authData?.user;
+  if (!user) {
+    console.error('No user found after signup')
+    redirect('/error');
+  }
+
+  const { error: insertError } = await supabase
+    .from('users')
+    .insert([
+      {
+        id: user.id,
+        name: non_auth_data.name,
+        username: non_auth_data.username,
+        bio: "",
+        followers: 0,
+        following: 0,
+      },
+    ]);
+
+    if (insertError) {
+      if (insertError.details.includes("Key (id)") && insertError.details.includes("not present")) {
+        console.log("The email is already in use!")
+        return;
+      }
+      console.error('Error inserting user data:', insertError)
+      redirect('/error')
+    }
+  
   revalidatePath('/', 'layout')
   redirect('/login')
 }
