@@ -32,9 +32,12 @@ export async function signup(formData: FormData) {
   // in practice, you should validate your inputs
   const data = {
     email: formData.get('email') as string,
+    password: formData.get('password') as string,
+  }
+
+  const non_auth_data = {
     name: formData.get('name') as string,
     username: formData.get('username') as string,
-    password: formData.get('password') as string,
   }
 
   const { error } = await supabase.auth.signUp(data)
