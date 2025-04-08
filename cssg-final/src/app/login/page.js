@@ -1,4 +1,4 @@
-import { login } from './actions'
+import { login } from '../actions'
 
 export default function LoginPage() {  
   return (
@@ -38,7 +38,7 @@ export default function LoginPage() {
 
         <div className="my-8 text-center text-white">-------------------------- OR --------------------------</div>
 
-        <div className="text-center">Don't have an account? <a href="/signup" className="text-blue-500 text-sm hover:underline">Sign Up</a></div>
+        <div className="text-center">Don't have an account? <a href="../signup" className="text-blue-500 text-sm hover:underline">Sign Up</a></div>
       </div>
     </div>
   )

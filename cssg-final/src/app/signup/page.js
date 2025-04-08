@@ -1,6 +1,6 @@
-import { login } from './actions'
+import { signup } from '../actions'
 
-export default function LoginPage() {  
+export default function SignupPage() {
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-zinc-900 text-white">
       <div className="bg-zinc-800 w-full max-w-sm p-8 rounded-lg shadow-md">
@@ -21,6 +21,22 @@ export default function LoginPage() {
             className="w-full p-3 bg-zinc-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <input
+            id="name"
+            name="name"
+            type="name"
+            placeholder="Full Name"
+            required
+            className="w-full p-3 bg-zinc-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <input
+            id="username"
+            name="username"
+            type="username"
+            placeholder="Username"
+            required
+            className="w-full p-3 bg-zinc-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <input
             id="password"
             name="password"
             type="password"
@@ -28,17 +44,18 @@ export default function LoginPage() {
             required
             className="w-full p-3 bg-zinc-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
           />
-          <a className="ml-45 text-blue-500 text-sm hover:underline">
-            Forgotten password?
-          </a>
-          <button formAction={login} 
+          <p className="text-zinc-500">
+            By signing up, you agree to our <a className="text-blue-500 text-sm hover:underline">Terms</a
+            > , <a className="text-blue-500 text-sm hover:underline">Privacy Policy</a> and <a className="text-blue-500 text-sm hover:underline">Cookies Policy</a>.
+          </p>
+          <button formAction={signup}
           className="w-full bg-blue-500 p-3 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 mt-10">
-            Log In</button>
+            Sign Up</button>
         </form>
 
         <div className="my-8 text-center text-white">-------------------------- OR --------------------------</div>
 
-        <div className="text-center">Don't have an account? <a href="/signup" className="text-blue-500 text-sm hover:underline">Sign Up</a></div>
+        <div className="text-center">Have an account? <a href="../login" className="text-blue-500 text-sm hover:underline">Log In</a></div>
       </div>
     </div>
   )

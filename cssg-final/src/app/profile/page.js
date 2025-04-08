@@ -1,12 +1,30 @@
 // import Image from "next/image";
 import Link from "next/link";
 
-export default function InstagramClone() {
+import { redirect } from 'next/navigation'
+import { createClient } from '../../../utils/supabase/server'
+
+import { logout } from '../actions'
+
+export default async function InstagramClone() {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase.auth.getUser()
+  if (error || !data?.user) {
+    redirect('../.')
+  }
+
   return (
-    <div className="bg-black text-white">
+    
+    <div className="bg-zinc-900 text-white">
+      <p className="px-100">Hello {data.user.email}</p>
+      <button
+          onClick={logout}
+          className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+        ></button>
       {/* Header */}
       <header className="flex justify-center border-b-2 border-gray-700 py-4">
-        <img src="./ig-logo.png" alt="Instagram Logo" className="w-1/8 mr-60" />
+        <img src="./ig-logo.svg" alt="Instagram Logo" className="w-1/8 mr-60" />
       </header>
 
       {/* Profile Section */}
@@ -75,7 +93,6 @@ export default function InstagramClone() {
           <button className="px-4 py-2 bg-sky-500">Go to contact test page.</button>
         </Link>
       </div>
-        
     </div>
   );
 }
