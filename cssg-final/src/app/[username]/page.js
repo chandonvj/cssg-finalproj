@@ -1,8 +1,37 @@
+import { createClient } from '../../../utils/supabase/server';
 import Image from "next/image";
 import Link from 'next/link';
 import { logout } from '../actions'
 
-export default async function ProfilePage() {  
+export default async function ProfilePage({ params }) {
+    const awaitedParams = await params;
+    const { username } = awaitedParams;
+    const supabase = await createClient();
+
+    // Fetch the user profile from Supabase
+    const { data: profile, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('username', username)
+        .single(); // Get just one match
+
+    if (error || !profile) {
+        return <div>Sorry, this page isn't available.</div>
+    }
+
+    const {
+        data: { user: currentUser },
+    } = await supabase.auth.getUser();
+
+    const { data: currentProfile } = await supabase
+        .from("users")
+        .select("username")
+        .eq("id", currentUser?.id)
+        .single();
+
+
+    const isOwnProfile = currentUser && currentUser.id === profile.id;
+
     return (
         <div className="flex min-h-screen bg-zinc-900 text-white">
             {/* Sidebar */}
@@ -10,10 +39,10 @@ export default async function ProfilePage() {
                 <div className="flex flex-col flex-grow">
                     <img src="./ig-logo.svg" alt="Instagram Logo" className="w-2/3" />
                     <nav className="ml-4 space-y-4">
-                        <SidebarItem label="Home" icon="/icons/home-icon.svg" href="/home"/>
+                        <SidebarItem label="Home" icon="/icons/home-icon.svg" href="./"/>
                         <SidebarItem label="Explore" icon="/icons/compass-icon.svg" href="/explore"/>
                         <SidebarItem label="Create" icon="/icons/create-icon.svg" href="/create"/>
-                        <SidebarItem label="Profile" icon="/baby-tux.jpg" href="/profile" className="rounded-full object-cover"/>
+                        <SidebarItem label="Profile" icon="/default-pfp.jpg" href={currentProfile.username} className="rounded-full object-cover"/>
                     </nav>
                 </div>
                 <div className="mt-80">
@@ -37,7 +66,7 @@ export default async function ProfilePage() {
                     {/* Profile Header */}
                     <div className="flex space-x-10 border-b border-zinc-700">
                         <Image
-                            src="/baby-tux.jpg"
+                            src="/default-pfp.jpg"
                             alt="Profile Picture"
                             width={200}
                             height={200}
@@ -45,17 +74,29 @@ export default async function ProfilePage() {
                         />
                         <div className="mt-10">
                             <div className="flex items-center space-x-4">
-                                <h2 className="text-3xl font-semibold">baby_tux</h2>
-                                <button className="ml-4 bg-zinc-600 px-5 py-2 rounded-xl text-md font-bold hover:bg-zinc-700">Edit Profile</button>
+                                <h2 className="text-3xl font-semibold">{profile.username}</h2>
+                                {isOwnProfile ? (
+                                    <button className="ml-4 bg-zinc-600 px-5 py-2 rounded-xl text-md font-bold hover:bg-zinc-700">Edit Profile</button>
+                                ) : (
+                                <div>
+                                    <button className="ml-4 bg-blue-500 px-5 py-2 rounded-xl text-md font-bold hover:bg-blue-600">
+                                        Follow
+                                    </button>
+                                    <button className="ml-4 bg-zinc-600 px-5 py-2 rounded-xl text-md font-bold hover:bg-zinc-700">
+                                        Message
+                                    </button>
+                                </div>
+                                )}
+                                
                             </div>
                             <div className="text-xl flex space-x-10 mt-8">
                                 <span><strong>6</strong> posts</span>
-                                <span><strong>1.2K</strong> followers</span>
-                                <span><strong>321</strong> following</span>
+                                <span><strong>???????</strong> followers</span>
+                                <span><strong>???????</strong> following</span>
                             </div>
                             <div className="text-lg mt-10">
-                                <p className="font-semibold">Baby Tux</p>
-                                <p className="mt-2">Here is a pretty cool description I guess.</p>
+                                <p className="font-semibold">{profile.name}</p>
+                                <p className="mt-2">{profile.bio}</p>
                             </div>
                         </div>
                     </div>

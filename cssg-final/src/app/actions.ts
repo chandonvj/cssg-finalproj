@@ -22,7 +22,7 @@ export async function login(formData: FormData) {
   }
 
   revalidatePath('/', 'layout')
-  redirect('/home')
+  redirect('/')
 }
 
 export async function signup(formData: FormData) {
@@ -78,8 +78,6 @@ export async function signup(formData: FormData) {
         name: non_auth_data.name,
         username: non_auth_data.username,
         bio: "",
-        followers: 0,
-        following: 0,
       },
     ]);
 
