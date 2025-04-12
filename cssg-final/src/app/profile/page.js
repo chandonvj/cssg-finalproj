@@ -35,7 +35,7 @@ export default async function ProfilePage() {
             <main className="ml-90 flex-1 p-8">
                 <div className="max-w-3xl mx-auto ">
                     {/* Profile Header */}
-                    <div className="flex space-x-10 mb-10 border-b border-zinc-700">
+                    <div className="flex space-x-10 border-b border-zinc-700">
                         <Image
                             src="/baby-tux.jpg"
                             alt="Profile Picture"
@@ -49,17 +49,18 @@ export default async function ProfilePage() {
                                 <button className="ml-4 bg-zinc-600 px-5 py-2 rounded-xl text-md font-bold hover:bg-zinc-700">Edit Profile</button>
                             </div>
                             <div className="text-xl flex space-x-10 mt-8">
-                                <span><strong>54</strong> posts</span>
+                                <span><strong>6</strong> posts</span>
                                 <span><strong>1.2K</strong> followers</span>
                                 <span><strong>321</strong> following</span>
                             </div>
                             <div className="text-lg mt-10">
                                 <p className="font-semibold">Baby Tux</p>
-                                <p className="mt-2">🐧 Just vibing in the Linux world.</p>
+                                <p className="mt-2">Here is a pretty cool description I guess.</p>
                             </div>
                         </div>
                     </div>
 
+                    <div className="flex"><div className="text-xl font-bold mx-auto px-3 py-5 border-t border-white">Posts</div></div>
                     {/* Posts Grid */}
                     <div className="grid grid-cols-3 gap-4">
                         {[1, 2, 3, 4, 5, 6].map((num) => (
