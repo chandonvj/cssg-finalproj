@@ -1,98 +1,102 @@
-// import Image from "next/image";
-import Link from "next/link";
-
-import { redirect } from 'next/navigation'
-import { createClient } from '../../../utils/supabase/server'
-
+import Image from "next/image";
+import Link from 'next/link';
 import { logout } from '../actions'
 
-export default async function InstagramClone() {
-  const supabase = await createClient()
+export default async function ProfilePage() {  
+    return (
+        <div className="flex min-h-screen bg-zinc-900 text-white">
+            {/* Sidebar */}
+            <aside className="w-90 p-4 border-r border-zinc-700 fixed h-full flex flex-col justify-between">
+                <div className="flex flex-col flex-grow">
+                    <img src="./ig-logo.svg" alt="Instagram Logo" className="w-2/3" />
+                    <nav className="ml-4 space-y-4">
+                        <SidebarItem label="Home" icon="/icons/home-icon.svg" href="/home"/>
+                        <SidebarItem label="Explore" icon="/icons/compass-icon.svg" href="/explore"/>
+                        <SidebarItem label="Create" icon="/icons/create-icon.svg" href="/create"/>
+                        <SidebarItem label="Profile" icon="/baby-tux.jpg" href="/profile" className="rounded-full object-cover"/>
+                    </nav>
+                </div>
+                <div className="mt-80">
+                    <button onClick={logout} className="flex items-center gap-4 w-full px-3 py-2 rounded-md hover:bg-gray-100 text-left">
+                        <Image
+                            src="/icons/logout-icon.svg"
+                            alt="Log Out"
+                            width={36}
+                            height={36}
+                            className="object-contain"
+                        ></Image>
+                        <span className="text-md">Log Out</span>
+                    </button>
+                </div>
+                    
+            </aside>
 
-  const { data, error } = await supabase.auth.getUser()
-  if (error || !data?.user) {
-    redirect('../.')
-  }
+            {/* Main Content */}
+            <main className="ml-90 flex-1 p-8">
+                <div className="max-w-3xl mx-auto ">
+                    {/* Profile Header */}
+                    <div className="flex space-x-10 mb-10 border-b border-zinc-700">
+                        <Image
+                            src="/baby-tux.jpg"
+                            alt="Profile Picture"
+                            width={200}
+                            height={200}
+                            className="my-10 mr-20 rounded-full object-cover"
+                        />
+                        <div className="mt-10">
+                            <div className="flex items-center space-x-4">
+                                <h2 className="text-3xl font-semibold">baby_tux</h2>
+                                <button className="ml-4 bg-zinc-600 px-5 py-2 rounded-xl text-md font-bold hover:bg-zinc-700">Edit Profile</button>
+                            </div>
+                            <div className="text-xl flex space-x-10 mt-8">
+                                <span><strong>54</strong> posts</span>
+                                <span><strong>1.2K</strong> followers</span>
+                                <span><strong>321</strong> following</span>
+                            </div>
+                            <div className="text-lg mt-10">
+                                <p className="font-semibold">Baby Tux</p>
+                                <p className="mt-2">🐧 Just vibing in the Linux world.</p>
+                            </div>
+                        </div>
+                    </div>
 
-  return (
-    
-    <div className="bg-zinc-900 text-white">
-      <p className="px-100">Hello {data.user.email}</p>
-      <button
-          onClick={logout}
-          className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
-        ></button>
-      {/* Header */}
-      <header className="flex justify-center border-b-2 border-gray-700 py-4">
-        <img src="./ig-logo.svg" alt="Instagram Logo" className="w-1/8 mr-60" />
-      </header>
+                    {/* Posts Grid */}
+                    <div className="grid grid-cols-3 gap-4">
+                        {[1, 2, 3, 4, 5, 6].map((num) => (
+                            <div key={num} className="aspect-square bg-zinc-800 rounded overflow-hidden">
+                                <Image
+                                    src={`/posts/post${num}.png`}
+                                    alt={`Post ${num}`}
+                                    width={300}
+                                    height={500}
+                                    className="object-contain w-full h-full"
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </main>
+        </div>
+    );
+}
 
-      {/* Profile Section */}
-      <div id="profile" className="mt-6 mx-auto flex flex-row items-center space-x-6 w-7/12 border-b-2 border-gray-700 pb-4">
-        <img
-          src="./baby-tux.jpg"
-          alt="Profile"
-          className="rounded-full w-55 h-55 ml-5"
-        />
-        <div id="prof_text" className="flex flex-col w-full">
-          <div className="flex items-center space-x-4">
-            <p className="text-2xl">Baby Penguin</p>
-            <button
-              id="follow"
-              className="bg-sky-500 px-4 py-2 text-white"
-            >
-              Follow
+
+function SidebarItem(props) {
+    const isProfile = props.label === "Profile";
+    const isPage = props.label === "Profile";
+
+    return (
+        <Link href={props.href} passHref>
+            <button className="flex items-center gap-8 w-full px-3 py-5 rounded-md hover:bg-zinc-800 text-left">
+                <Image
+                    src={props.icon}
+                    alt={props.label}
+                    width={36}
+                    height={36}
+                    className={`${isProfile ? 'rounded-full object-cover' : 'object-contain'}`}
+                />
+                <span className={`text-xl ${isPage ? 'font-bold' : ''}`}>{props.label}</span>
             </button>
-          </div>
-          <div className="flex space-x-6 mt-3">
-            <p className="text-lg">4 posts</p>
-            <p className="text-lg">12 followers</p>
-            <p className="text-lg">8 following</p>
-          </div>
-          <p className="mt-4">description stuff goes here !!!</p>
-        </div>
-      </div>
-
-      {/* Posts Section */}
-      <div id="posts" className="mx-auto mt-6 grid grid-cols-3 gap-4 w-7/12">
-        <div className="post w-full h-96 overflow-hidden rounded-lg">
-          <img
-            src="post1.png"
-            alt="Post 1"
-            className="w-full h-full object-cover"
-          />
-        </div>
-        <div className="post w-full h-96 overflow-hidden rounded-lg">
-          <img
-            src="post2.png"
-            alt="Post 2"
-            className="w-full h-full object-cover"
-          />
-        </div>
-        <div className="post w-full h-96 overflow-hidden rounded-lg">
-          <img
-            src="post3.png"
-            alt="Post 3"
-            className="w-full h-full object-cover"
-          />
-        </div>
-        <div className="post w-full h-96 overflow-hidden rounded-lg">
-          <img
-            src="post4.png"
-            alt="Post 4"
-            className="w-full h-full object-cover"
-          />
-        </div>
-      </div>
-
-      <div className="flex justify-center border-b-2 border-gray-700 py-4 mt-10">
-        <Link href="/about">
-          <button className="px-4 py-2 bg-sky-500 mr-10">Go to about test page.</button>
         </Link>
-        <Link href="/contact">
-          <button className="px-4 py-2 bg-sky-500">Go to contact test page.</button>
-        </Link>
-      </div>
-    </div>
-  );
+    );
 }
