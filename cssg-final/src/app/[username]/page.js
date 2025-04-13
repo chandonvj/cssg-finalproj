@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from 'next/link';
+import Image from "next/image";
 import { logout, getSupabaseWithUser, follower, unfollower } from '../actions'
 
 export default async function ProfilePage({ params }) {
@@ -7,7 +7,7 @@ export default async function ProfilePage({ params }) {
     const { supabase, user } = await getSupabaseWithUser()
     const { data: userProfile } = await supabase
         .from("users")
-        .select("username")
+        .select("*")
         .eq("id", user?.id)
         .single();
 
@@ -58,11 +58,11 @@ export default async function ProfilePage({ params }) {
                         <SidebarItem label="Home" icon="/icons/home-icon.svg" href="./"/>
                         <SidebarItem label="Explore" icon="/icons/compass-icon.svg" href="/explore"/>
                         <SidebarItem label="Create" icon="/icons/create-icon.svg" href="/create"/>
-                        <SidebarItem label="Profile" icon="/default-pfp.jpg" href={userProfile.username} className="rounded-full object-cover"/>
+                        <SidebarItem label="Profile" icon={userProfile?.avatar_url} href={userProfile.username} className="rounded-full object-cover"/>
                     </nav>
                 </div>
                 <div className="mt-80">
-                    <button onClick={logout} className="flex items-center gap-4 w-full px-3 py-2 rounded-md hover:bg-gray-100 text-left">
+                    <button onClick={logout} className="flex items-center gap-4 w-full px-3 py-2 rounded-md hover:bg-zinc-800 ">
                         <Image
                             src="/icons/logout-icon.svg"
                             alt="Log Out"
@@ -70,7 +70,7 @@ export default async function ProfilePage({ params }) {
                             height={36}
                             className="object-contain"
                         ></Image>
-                        <span className="text-md">Log Out</span>
+                        <span className="text-xl">Log Out</span>
                     </button>
                 </div>
                     
@@ -82,7 +82,7 @@ export default async function ProfilePage({ params }) {
                     {/* Profile Header */}
                     <div className="flex space-x-10 border-b border-zinc-700">
                         <Image
-                            src="/default-pfp.jpg"
+                            src={profile?.avatar_url}
                             alt="Profile Picture"
                             width={200}
                             height={200}
@@ -92,7 +92,9 @@ export default async function ProfilePage({ params }) {
                             <div className="flex items-center space-x-4">
                                 <h2 className="text-3xl font-semibold">{profile.username}</h2>
                                 {isOwnProfile ? (
-                                    <button className="ml-4 bg-zinc-600 px-5 py-2 rounded-xl text-md font-bold hover:bg-zinc-700">Edit Profile</button>
+                                    <Link href="/edit-profile" passHref>
+                                        <button className="ml-4 bg-zinc-600 px-5 py-2 rounded-xl text-md font-bold hover:bg-zinc-700">Edit Profile</button>
+                                    </Link>
                                 ) : (
                                 <div className="flex">
                                     {isFollowing ? (
@@ -133,13 +135,13 @@ export default async function ProfilePage({ params }) {
                     {/* Posts Grid */}
                     <div className="grid grid-cols-3 gap-4">
                         {[1, 2, 3, 4, 5, 6].map((num) => (
-                            <div key={num} className="aspect-square bg-zinc-800 rounded overflow-hidden">
+                            <div key={num} className="bg-zinc-800 rounded overflow-hidden">
                                 <Image
                                     src={`/posts/post${num}.png`}
                                     alt={`Post ${num}`}
                                     width={300}
-                                    height={500}
-                                    className="object-contain w-full h-full"
+                                    height={300}
+                                    className="object-cover w-full h-full"
                                 />
                             </div>
                         ))}
@@ -157,7 +159,7 @@ function SidebarItem(props) {
 
     return (
         <Link href={props.href} passHref>
-            <button className="flex items-center gap-8 w-full px-3 py-5 rounded-md hover:bg-zinc-800 text-left">
+            <button className="flex items-center gap-8 w-full px-3 py-5 rounded-md hover:bg-zinc-800">
                 <Image
                     src={props.icon}
                     alt={props.label}

@@ -2,21 +2,18 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-
 import { createClient } from '../../utils/supabase/server'
 
 export async function login(formData: FormData) {
   const supabase = await createClient()
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
+  // type-casting here for convenience, should validate
   const data = {
     email: formData.get('email') as string,
     password: formData.get('password') as string,
   }
 
   const { error } = await supabase.auth.signInWithPassword(data)
-
   if (error) {
     redirect('/error')
   }
@@ -28,37 +25,32 @@ export async function login(formData: FormData) {
 export async function signup(formData: FormData) {
   const supabase = await createClient()
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
+  // type-casting here for convenience, should validate
   const data = {
     email: formData.get('email') as string,
     password: formData.get('password') as string,
   }
-
   const non_auth_data = {
     name: formData.get('name') as string,
     username: formData.get('username') as string,
   }
 
-   // Check if a user already exists with the provided username
-   const { data: existingUsernames, error: usernameError } = await supabase
+  // Check if a user already exists with the provided username
+  const { data: existingUsernames, error: usernameError } = await supabase
     .from('users')
     .select('username')
     .eq('username', non_auth_data.username);
-
   if (usernameError) {
     console.error('Error checking if username exists:', usernameError)
     redirect('/error')
   }
-
   // If the username already exists, do nothing
   if (existingUsernames.length > 0) {
-    console.log('Username already taken:', non_auth_data.username)
+    alert('Username already taken');
     return;
   }
 
   const { data: authData, error: authError } = await supabase.auth.signUp(data)
-
   if (authError) {
     console.error('Error signing up auth user:', authError)
     redirect('/error')
@@ -80,15 +72,14 @@ export async function signup(formData: FormData) {
         bio: "",
       },
     ]);
-
-    if (insertError) {
-      if (insertError.details.includes("Key (id)") && insertError.details.includes("not present")) {
-        console.log("The email is already in use!")
-        return;
-      }
-      console.error('Error inserting user data:', insertError)
-      redirect('/error')
+  if (insertError) {
+    if (insertError.details.includes("Key (id)") && insertError.details.includes("not present")) {
+      console.log("The email is already in use!")
+      return;
     }
+    console.error('Error inserting user data:', insertError)
+    redirect('/error')
+  }
   
   revalidatePath('/', 'layout')
   redirect('/login')
@@ -98,7 +89,6 @@ export async function logout() {
   const supabase = await createClient()
 
   const { error } = await supabase.auth.signOut()
-
   if (error) {
     redirect('/error')
   }
@@ -115,7 +105,6 @@ export async function getSupabaseWithUser() {
     data: { user },
     error,
   } = await supabase.auth.getUser();
-
   if (error || !user) throw new Error('User not authenticated');
 
   return { supabase, user };
@@ -124,7 +113,7 @@ export async function getSupabaseWithUser() {
 export async function getUserByUsername(supabase: any, username: string) {
   const { data, error } = await supabase
     .from('users')
-    .select('id')
+    .select('*')
     .eq('username', username)
     .single();
 
@@ -133,7 +122,7 @@ export async function getUserByUsername(supabase: any, username: string) {
   return data;
 }
 
-export async function follower(formData) {
+export async function follower(formData: FormData) {
   const recipientUsername = formData.get('username') as string;
 
   try {
@@ -153,7 +142,7 @@ export async function follower(formData) {
   }
 }
 
-export async function unfollower(formData) {
+export async function unfollower(formData: FormData) {
   const recipientUsername = formData.get('username') as string;
 
   try {
@@ -173,4 +162,57 @@ export async function unfollower(formData) {
   } catch (error: any) {
     return { error: error.message }
   }
+}
+
+export async function editProfile(formData: FormData) {
+  const { supabase, user } = await getSupabaseWithUser();
+
+  const { data: currentProfile, error: fetchError } = await supabase
+    .from('users')
+    .select('name, username, bio')
+    .eq('id', user.id)
+    .single();
+  if (fetchError || !currentProfile) {
+    throw new Error("Failed to fetch current profile.");
+  }
+
+  const formName = formData.get('name') as string;
+  const formUsername = formData.get('username') as string;
+  const formBio = formData.get('bio') as string;
+
+  const updatedData = {
+    name: formName || currentProfile.name,
+    username: currentProfile.username,
+    bio: formBio || currentProfile.bio,
+  };
+
+  // Check if a user already exists with the provided username
+  if (
+    formUsername &&
+    formUsername !== currentProfile.username // only check if it's a new username
+  ) {
+    const { data: existingUser } = await supabase
+      .from('users')
+      .select('id')
+      .eq('username', formUsername)
+      .neq('id', user.id) // ignore current user
+      .maybeSingle();
+
+    if (!existingUser) {
+      updatedData.username = formUsername;
+    }
+  }
+
+  const { error } = await supabase
+    .from('users')
+    .update(updatedData)
+    .eq('id', user.id);
+
+  if (error) {
+    console.error("Error updating profile:", error.message);
+    throw new Error("Failed to update profile.");
+  }
+
+  revalidatePath('/edit-profile')
+    redirect('/edit-profile')
 }

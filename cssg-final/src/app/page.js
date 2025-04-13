@@ -1,25 +1,15 @@
 import Image from "next/image";
 import Link from 'next/link';
-import { logout } from './actions';
-import { createClient } from '../../utils/supabase/server';
+import { logout, getSupabaseWithUser } from './actions';
 
 export default async function HomePage() {  
-  const supabase = await createClient();
+  const { supabase, user } = await getSupabaseWithUser()
 
-  const { data, getError } = await supabase.auth.getUser()
-  if (getError || !data?.user) {
-    redirect('/login')
-  }
-
-  const { data: profile, profileError } = await supabase
+  const { data: userProfile } = await supabase
       .from('users')
-      .select('username')
-      .eq('id', data.user.id)
+      .select('*')
+      .eq('id', user?.id)
       .single();
-
-  if (profileError || !profile) {
-      return <div>Sorry, this page isn't available.</div>
-  }
 
   return (
     <div className="flex min-h-screen bg-zinc-900 text-white">
@@ -31,11 +21,11 @@ export default async function HomePage() {
                     <SidebarItem label="Home" icon="/icons/home-icon.svg" href="./" className="text-bold"/>
                     <SidebarItem label="Explore" icon="/icons/compass-icon.svg" href="/explore"/>
                     <SidebarItem label="Create" icon="/icons/create-icon.svg" href="/create"/>
-                    <SidebarItem label="Profile" icon="/default-pfp.jpg" href={profile.username}/>
+                    <SidebarItem label="Profile" icon={userProfile?.avatar_url} href={userProfile.username}/>
                 </nav>
             </div>
-            <div className="mt-80">
-                <button onClick={logout} className="flex items-center gap-4 w-full px-3 py-2 rounded-md hover:bg-gray-100 text-left">
+            <div className="mt-80 ml-4">
+                <button onClick={logout} className="flex items-center gap-4 w-full px-3 py-2 rounded-md hover:bg-zinc-800">
                     <Image
                         src="/icons/logout-icon.svg"
                         alt="Log Out"
@@ -43,7 +33,7 @@ export default async function HomePage() {
                         height={36}
                         className="object-contain"
                     ></Image>
-                    <span className="text-md">Log Out</span>
+                    <span className="text-xl">Log Out</span>
                 </button>
             </div>
                 
@@ -68,7 +58,7 @@ function SidebarItem(props) {
 
     return (
         <Link href={props.href} passHref>
-            <button className="flex items-center gap-8 w-full px-3 py-5 rounded-md hover:bg-zinc-800 text-left">
+            <button className="flex items-center gap-8 w-full px-3 py-5 rounded-md hover:bg-zinc-800">
                 <Image
                     src={props.icon}
                     alt={props.label}
