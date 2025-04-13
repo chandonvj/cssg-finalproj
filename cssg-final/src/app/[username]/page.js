@@ -1,36 +1,52 @@
-import { createClient } from '../../../utils/supabase/server';
 import Image from "next/image";
 import Link from 'next/link';
-import { logout } from '../actions'
+import { logout, getSupabaseWithUser, follower, unfollower } from '../actions'
 
 export default async function ProfilePage({ params }) {
+
+    const { supabase, user } = await getSupabaseWithUser()
+    const { data: userProfile } = await supabase
+        .from("users")
+        .select("username")
+        .eq("id", user?.id)
+        .single();
+
     const awaitedParams = await params;
     const { username } = awaitedParams;
-    const supabase = await createClient();
 
-    // Fetch the user profile from Supabase
+    // Fetch the current profile from Supabase
     const { data: profile, error } = await supabase
         .from('users')
         .select('*')
         .eq('username', username)
-        .single(); // Get just one match
+        .single();
 
     if (error || !profile) {
         return <div>Sorry, this page isn't available.</div>
     }
 
-    const {
-        data: { user: currentUser },
-    } = await supabase.auth.getUser();
+    const isOwnProfile = user && user.id === profile.id;
 
-    const { data: currentProfile } = await supabase
-        .from("users")
-        .select("username")
-        .eq("id", currentUser?.id)
-        .single();
+    // Count followers.
+    const { count: followersCount } = await supabase
+        .from('follows')
+        .select('*', { count: 'exact', head: true })
+        .eq('recipient', profile.id);
+    // Count
+    const { count: followingCount } = await supabase
+        .from('follows')
+        .select('*', { count: 'exact', head: true })
+        .eq('follower', profile.id);
 
+    // Check if current user follows this profile
+    const { data: followData } = await supabase
+        .from('follows')
+        .select('*')
+        .eq('follower', user?.id)
+        .eq('recipient', profile.id)
+        .maybeSingle();
 
-    const isOwnProfile = currentUser && currentUser.id === profile.id;
+    const isFollowing = !followData;
 
     return (
         <div className="flex min-h-screen bg-zinc-900 text-white">
@@ -42,7 +58,7 @@ export default async function ProfilePage({ params }) {
                         <SidebarItem label="Home" icon="/icons/home-icon.svg" href="./"/>
                         <SidebarItem label="Explore" icon="/icons/compass-icon.svg" href="/explore"/>
                         <SidebarItem label="Create" icon="/icons/create-icon.svg" href="/create"/>
-                        <SidebarItem label="Profile" icon="/default-pfp.jpg" href={currentProfile.username} className="rounded-full object-cover"/>
+                        <SidebarItem label="Profile" icon="/default-pfp.jpg" href={userProfile.username} className="rounded-full object-cover"/>
                     </nav>
                 </div>
                 <div className="mt-80">
@@ -78,10 +94,22 @@ export default async function ProfilePage({ params }) {
                                 {isOwnProfile ? (
                                     <button className="ml-4 bg-zinc-600 px-5 py-2 rounded-xl text-md font-bold hover:bg-zinc-700">Edit Profile</button>
                                 ) : (
-                                <div>
-                                    <button className="ml-4 bg-blue-500 px-5 py-2 rounded-xl text-md font-bold hover:bg-blue-600">
-                                        Follow
-                                    </button>
+                                <div className="flex">
+                                    {isFollowing ? (
+                                        <form action={follower}>
+                                        <input type="hidden" name="username" value={profile.username}/>
+                                        <button type="submit" className="ml-4 bg-blue-500 px-5 py-2 rounded-xl text-md font-bold hover:bg-blue-600">
+                                            Follow
+                                        </button>
+                                    </form>
+                                    ) : (
+                                        <form action={unfollower}>
+                                            <input type="hidden" name="username" value={profile.username}/>
+                                            <button type="submit" className="ml-4 bg-zinc-600 px-5 py-2 rounded-xl text-md font-bold hover:bg-zinc-700">
+                                                Following
+                                            </button>
+                                        </form>
+                                    )}
                                     <button className="ml-4 bg-zinc-600 px-5 py-2 rounded-xl text-md font-bold hover:bg-zinc-700">
                                         Message
                                     </button>
@@ -91,8 +119,8 @@ export default async function ProfilePage({ params }) {
                             </div>
                             <div className="text-xl flex space-x-10 mt-8">
                                 <span><strong>6</strong> posts</span>
-                                <span><strong>???????</strong> followers</span>
-                                <span><strong>???????</strong> following</span>
+                                <span><strong>{followersCount}</strong> followers</span>
+                                <span><strong>{followingCount}</strong> following</span>
                             </div>
                             <div className="text-lg mt-10">
                                 <p className="font-semibold">{profile.name}</p>

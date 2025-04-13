@@ -106,3 +106,71 @@ export async function logout() {
   revalidatePath('/', 'layout')
   redirect('/login')
 }
+
+
+export async function getSupabaseWithUser() {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (error || !user) throw new Error('User not authenticated');
+
+  return { supabase, user };
+}
+
+export async function getUserByUsername(supabase: any, username: string) {
+  const { data, error } = await supabase
+    .from('users')
+    .select('id')
+    .eq('username', username)
+    .single();
+
+  if (error || !data) throw new Error('User not found');
+
+  return data;
+}
+
+export async function follower(formData) {
+  const recipientUsername = formData.get('username') as string;
+
+  try {
+    const { supabase, user } = await getSupabaseWithUser();
+    const recipientUser = await getUserByUsername(supabase, recipientUsername);
+
+    const { error: insertError } = await supabase
+    .from('follows')
+    .insert([{ follower: user.id, recipient: recipientUser.id }]);
+
+    if (insertError) return { error: insertError.message };
+
+    revalidatePath(`/${recipientUsername}`);
+    redirect(`/${recipientUsername}`)
+  } catch (error: any) {
+    return { error: error.message }
+  }
+}
+
+export async function unfollower(formData) {
+  const recipientUsername = formData.get('username') as string;
+
+  try {
+    const { supabase, user } = await getSupabaseWithUser();
+    const recipientUser = await getUserByUsername(supabase, recipientUsername);
+
+    const { error: deleteError } = await supabase
+      .from('follows')
+      .delete()
+      .eq('follower', user.id)
+      .eq('recipient', recipientUser.id);
+
+    if (deleteError) return { error: deleteError.message };
+
+    revalidatePath(`/${recipientUsername}`)
+    redirect(`/${recipientUsername}`)
+  } catch (error: any) {
+    return { error: error.message }
+  }
+}
