@@ -6,7 +6,7 @@ export default function LoginPage() {
       <div className="bg-zinc-800 w-full max-w-sm p-8 rounded-lg shadow-md">
         <div className="flex justify-center mb-0">
           <img
-            src="./ig-logo.svg"
+            src="/ig-logo.svg"
             alt="Instagram Logo"
             className="w-64"
           />

@@ -214,5 +214,40 @@ export async function editProfile(formData: FormData) {
   }
 
   revalidatePath('/edit-profile')
-    redirect('/edit-profile')
+  redirect('/edit-profile')
+}
+
+export async function createPost(formData: FormData) {
+  const { supabase, user } = await getSupabaseWithUser();
+
+  const { data: currentProfile, error: fetchError } = await supabase
+    .from('users')
+    .select('name, username, bio')
+    .eq('id', user.id)
+    .single();
+  if (fetchError || !currentProfile) {
+    throw new Error("Failed to fetch current profile.");
+  }
+
+  const formImage = formData.get('imageSrc') as string;
+  const formCaption = formData.get('caption') as string;
+
+  const { error: tableError } = await supabase
+    .from('posts')
+    .insert([
+      {
+        user_id: user.id,
+        image_url: formImage,
+        caption: formCaption,
+      },
+    ]);
+
+  if (tableError) {
+    console.error('Failed to create post:', tableError);
+  } else {
+    console.log('Post created successfully');
+  }
+
+  revalidatePath('/create')
+  redirect(`/${currentProfile.username}`)
 }

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from "next/image";
 import { logout, getSupabaseWithUser, follower, unfollower } from '../actions'
+import UserListWrapper from './userListWrapper'
 
 export default async function ProfilePage({ params }) {
 
@@ -27,12 +28,18 @@ export default async function ProfilePage({ params }) {
 
     const isOwnProfile = user && user.id === profile.id;
 
+    // Count posts.
+    const { count: postsCount } = await supabase
+        .from('posts')
+        .select('*', {count: 'exact', head: true})
+        .eq('user_id', profile.id);
+
     // Count followers.
     const { count: followersCount } = await supabase
         .from('follows')
         .select('*', { count: 'exact', head: true })
         .eq('recipient', profile.id);
-    // Count
+    // Count following.
     const { count: followingCount } = await supabase
         .from('follows')
         .select('*', { count: 'exact', head: true })
@@ -53,9 +60,9 @@ export default async function ProfilePage({ params }) {
             {/* Sidebar */}
             <aside className="w-90 p-4 border-r border-zinc-700 fixed h-full flex flex-col justify-between">
                 <div className="flex flex-col flex-grow">
-                    <img src="./ig-logo.svg" alt="Instagram Logo" className="w-2/3" />
+                    <img src="/ig-logo.svg" alt="Instagram Logo" className="w-2/3" />
                     <nav className="ml-4 space-y-4">
-                        <SidebarItem label="Home" icon="/icons/home-icon.svg" href="./"/>
+                        <SidebarItem label="Home" icon="/icons/home-icon.svg" href="/"/>
                         <SidebarItem label="Explore" icon="/icons/compass-icon.svg" href="/explore"/>
                         <SidebarItem label="Create" icon="/icons/create-icon.svg" href="/create"/>
                         <SidebarItem label="Profile" icon={userProfile?.avatar_url} href={userProfile.username} className="rounded-full object-cover"/>
@@ -73,7 +80,6 @@ export default async function ProfilePage({ params }) {
                         <span className="text-xl">Log Out</span>
                     </button>
                 </div>
-                    
             </aside>
 
             {/* Main Content */}
@@ -84,9 +90,9 @@ export default async function ProfilePage({ params }) {
                         <Image
                             src={profile?.avatar_url}
                             alt="Profile Picture"
-                            width={200}
-                            height={200}
-                            className="my-10 mr-20 rounded-full object-cover"
+                            width={800}
+                            height={800}
+                            className="w-60 h-60 my-10 mr-20 rounded-full object-cover"
                         />
                         <div className="mt-10">
                             <div className="flex items-center space-x-4">
@@ -120,13 +126,19 @@ export default async function ProfilePage({ params }) {
                                 
                             </div>
                             <div className="text-xl flex space-x-10 mt-8">
-                                <span><strong>6</strong> posts</span>
-                                <span><strong>{followersCount}</strong> followers</span>
-                                <span><strong>{followingCount}</strong> following</span>
+                                <span><strong>{postsCount}</strong> posts</span>
+                                <div className="flex flex-row">
+                                    <p><strong>{followersCount}</strong></p>
+                                    <UserListWrapper profileId={profile.id} type='followers' />
+                                </div>
+                                <div className="flex flex-row">
+                                    <p><strong>{followingCount}</strong></p>
+                                    <UserListWrapper profileId={profile.id} type='following' />
+                                </div>
                             </div>
                             <div className="text-lg mt-10">
                                 <p className="font-semibold">{profile.name}</p>
-                                <p className="mt-2">{profile.bio}</p>
+                                <p className="mt-2 mb-10">{profile.bio}</p>
                             </div>
                         </div>
                     </div>

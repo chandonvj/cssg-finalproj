@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import Image from "next/image";
 import { logout, getSupabaseWithUser, editProfile } from '../actions'
-import dynamic from 'next/dynamic';
 import AvatarUploadWrapper from './AvatarUploaderWrapper'
 
 
@@ -15,13 +14,13 @@ export default async function EditorPage() {
         .single();
 
     return (
-        <div className="flex min-h-screen bg-zinc-900 text-white items-center">
+        <div className="flex min-h-screen bg-zinc-900 text-white">
             {/* Sidebar */}
             <aside className="w-90 p-4 border-r border-zinc-700 fixed h-full flex flex-col justify-between">
                 <div className="flex flex-col flex-grow">
-                    <img src="./ig-logo.svg" alt="Instagram Logo" className="w-2/3" />
+                    <img src="/ig-logo.svg" alt="Instagram Logo" className="w-2/3" />
                     <nav className="ml-4 space-y-4">
-                        <SidebarItem label="Home" icon="/icons/home-icon.svg" href="./" className="text-bold"/>
+                        <SidebarItem label="Home" icon="/icons/home-icon.svg" href="/" className="text-bold"/>
                         <SidebarItem label="Explore" icon="/icons/compass-icon.svg" href="/explore"/>
                         <SidebarItem label="Create" icon="/icons/create-icon.svg" href="/create"/>
                         <SidebarItem label="Profile" icon={userProfile?.avatar_url} href={userProfile.username}/>

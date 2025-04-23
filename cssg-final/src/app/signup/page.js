@@ -6,7 +6,7 @@ export default function SignupPage() {
       <div className="bg-zinc-800 w-full max-w-sm p-8 rounded-lg shadow-md">
         <div className="flex justify-center mb-0">
           <img
-            src="./ig-logo.svg"
+            src="/ig-logo.svg"
             alt="Instagram Logo"
             className="w-64"
           />
@@ -55,7 +55,7 @@ export default function SignupPage() {
 
         <div className="my-8 text-center text-white">-------------------------- OR --------------------------</div>
 
-        <div className="text-center">Have an account? <a href="../login" className="text-blue-500 text-sm hover:underline">Log In</a></div>
+        <div className="text-center">Have an account? <a href="/login" className="text-blue-500 text-sm hover:underline">Log In</a></div>
       </div>
     </div>
   )
