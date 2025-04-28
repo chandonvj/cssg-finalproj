@@ -56,6 +56,11 @@ export default async function ProfilePage({ params }) {
 
     const isFollowing = !followData;
 
+    const { data: posts } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('user_id', profile.id);
+
     return (
         <div className="flex min-h-screen bg-zinc-900 text-white">
             {/* Sidebar */}
@@ -147,17 +152,32 @@ export default async function ProfilePage({ params }) {
                     <div className="flex"><div className="text-xl font-bold mx-auto px-3 py-5 border-t border-white">Posts</div></div>
                     {/* Posts Grid */}
                     <div className="grid grid-cols-3 gap-4">
-                        {[1, 2, 3, 4, 5, 6].map((num) => (
-                            <div key={num} className="bg-zinc-800 rounded overflow-hidden">
-                                <Image
-                                    src={`/posts/post${num}.png`}
-                                    alt={`Post ${num}`}
-                                    width={300}
-                                    height={300}
-                                    className="object-cover w-full h-full"
-                                />
+                        {posts?.length > 0 ? (
+                            posts.map((post) => (
+                                <div key={post.id} className="bg-zinc-800 rounded overflow-hidden">
+                                    <Link href={`/p/${post.id}`}>
+                                        <Image
+                                            src={post.image_url}
+                                            alt={`Post ${post.id}`}
+                                            width={300}
+                                            height={300}
+                                            className="object-cover w-full h-full"
+                                        />
+                                    </Link>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="col-span-3 text-center text-lg text-zinc-400">
+                                <p>No posts yet.</p>
+                                {isOwnProfile && (
+                                    <Link href="/create">
+                                        <button className="mt-4 bg-blue-500 px-5 py-2 rounded-xl text-md font-bold hover:bg-blue-600">
+                                            Create your first post
+                                        </button>
+                                    </Link>
+                                )}
                             </div>
-                        ))}
+                        )}
                     </div>
                 </div>
             </main>
