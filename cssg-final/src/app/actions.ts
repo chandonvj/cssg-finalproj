@@ -251,3 +251,31 @@ export async function createPost(formData: FormData) {
   revalidatePath('/create')
   redirect(`/${currentProfile.username}`)
 }
+
+export async function deleteComment(formData: FormData) {
+  const { supabase, user } = await getSupabaseWithUser();
+
+  const commentId = formData.get('id') as string;
+
+  const { data: comment } = await supabase
+    .from('comments')
+    .select('user_id')
+    .eq('post_id', commentId)
+    .single();
+
+  if (comment?.user_id !== user?.id) {
+    throw new Error('Unauthorized');
+  }
+
+  const { error } = await supabase
+    .from('comments')
+    .delete()
+    .eq('post_id', commentId);
+
+  if (error) {
+    throw new Error('Failed to delete comment');
+  }
+
+  revalidatePath(`/p/${commentId}`);
+  redirect(`/p/${commentId}`);
+}

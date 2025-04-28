@@ -14,6 +14,7 @@ export default async function ProfilePage({ params }) {
 
     const awaitedParams = await params;
     const { username } = awaitedParams;
+    console.log(username);
 
     // Fetch the current profile from Supabase
     const { data: profile, error } = await supabase
@@ -105,11 +106,11 @@ export default async function ProfilePage({ params }) {
                                 <div className="flex">
                                     {isFollowing ? (
                                         <form action={follower}>
-                                        <input type="hidden" name="username" value={profile.username}/>
-                                        <button type="submit" className="ml-4 bg-blue-500 px-5 py-2 rounded-xl text-md font-bold hover:bg-blue-600">
-                                            Follow
-                                        </button>
-                                    </form>
+                                            <input type="hidden" name="username" value={profile.username}/>
+                                            <button type="submit" className="ml-4 bg-blue-500 px-5 py-2 rounded-xl text-md font-bold hover:bg-blue-600">
+                                                Follow
+                                            </button>
+                                        </form>
                                     ) : (
                                         <form action={unfollower}>
                                             <input type="hidden" name="username" value={profile.username}/>
