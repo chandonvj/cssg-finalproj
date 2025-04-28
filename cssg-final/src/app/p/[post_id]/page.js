@@ -1,5 +1,3 @@
-'use server'
-
 import Link from 'next/link';
 import Image from "next/image";
 import { logout, getSupabaseWithUser, deleteComment } from '../../actions'
@@ -145,9 +143,11 @@ export default async function PostPage({ params }) {
                                 <p className="text-sm text-zinc-400">No comments yet.</p>
                             )}
                         </div>
-                        <InteractWrapper>
-                            <Interact post_id={post_id} user={user} />
-                        </InteractWrapper>
+                        <div className="mt-auto">
+                            <InteractWrapper>
+                                <Interact post_id={post_id} user={user} />
+                            </InteractWrapper>
+                        </div>
                     </div>
                 </div>
             </main>
